@@ -1,0 +1,61 @@
+;; This file contains (a first estimate) of the percentages related to some possible
+;; family structures. Its aim is to make the disposition of the people into families
+;; customizable
+;; Families are created depending on some rules:
+;;   - normally at most 4 people per family -> though it may happen that for a person 
+;;     there aren't enough other people (of a proper age-class) to form a family with ->
+;;     -> in those cases, that person is assigned to an already existing family
+;;   - at most two children per family (at least normally, due to the rule above) ->
+;;     -> likeliness of having two children is specifiable in the siblings-percentage
+;;   - 0-4 have two parents 25-39
+;;   - 5-14 have two parents 40-64
+;;   - 15-19 have two parents 40-64
+;;   - 20-24 may live with another 20-24 (roommates) or with parents 40-64 or alone
+;;   - 25-39 may live with another 25-39 or alone
+;;   - 40-64 may live with another 40-64 or alone
+;;   - >=65 may live with another >=65 or alone
+;; Available perentages:
+;;   - parents-25-39-percentage -> the percentage of 25-39 being parents
+;;   - parents-40-64-percentage -> the percentage of 40-64 being parents
+;;   - siblings-percentage -> determines the percentage/likeliness of siblings in 
+;;     appropriate age classes (applied to those age classes living with parents)
+;;   - people-20-24-with-parents-percentage -> the percentage of 20-24 living with 
+;;     parents, contains also the siblings (single 20-24 children % will then be 
+;;     people-20-24-with-parents-percentage - siblings-percentage)
+;;   - people-20-24-house-sharing-percentage -> the percentage of 20-24 living with 
+;;     another 20-24 (roommates)
+;;   - people-25-39-in-a-couple-percentage -> the percentage of 25-39 living in a couple, 
+;;     not necessarily parents, but contains them too (couples without children 
+;;     obtainable by subtraction)
+;;   - people-40-64-in-a-couple-percentage -> the percentage of 40-64 living in a couple, 
+;;     not necessarily parents, but contains them too (couples without children 
+;;     obtainable by subtraction)
+;;   - people-65-and-over-in-a-couple-percentage -> the percentage of 65 and over living 
+;;     in a couple
+;; So percentages of people (of a proper age class) living alone are obtainable by 
+;; subtraction
+;; NB "living in a couple" implies both participants of the couple, the percentage keeps 
+;;    track of both
+;; NB for these percentages to hold and make sense the % of each age class must be 
+;;    coherent with what is written here
+;; To check if any person was reassigned to an already existing family, one can use from 
+;; the observer the following command -> 
+;; -> ask patches with [ count people-here > 4 ] [ print "-" ask people-here [ print age-class ] ]
+;; (prints the age classes of people in families with more than 4 individuals)
+
+;; parents-25-39-percentage
+50
+;; parents-40-64-percentage
+50
+;; siblings-percentage
+30
+;; people-20-24-with-parents-percentage
+50
+;; people-20-24-house-sharing-percentage
+40
+;; people-25-39-in-a-couple-percentage
+65
+;; people-40-64-in-a-couple-percentage
+80
+;; people-65-and-over-in-a-couple-percentage
+50

@@ -1,0 +1,17 @@
+;; This file contains (a first estimate of) the % of people per age class in Emilia-Romagna
+;; See -> https://www.tuttitalia.it/emilia-romagna/statistiche/popolazione-eta-sesso-stato-civile-2019/
+
+;; % 0-4
+3.9
+;; % 5-14
+9.1
+;; % 15-19
+4.4
+;; % 20-24
+4.5
+;; % 25-39
+16.3
+;; % 40-64
+37.7
+;; % >=65
+24.0

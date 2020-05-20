@@ -1,0 +1,26 @@
+;; This file contains all the leisure activities/jobs
+;; Activities are divided into 4 groups:
+;;   - leisure-activities -> include food related + free time commercial activities 
+;;    (restaurants, bars + malls, cinemas, parks...)
+;;   - education-activities -> include schools and universities
+;;   - health-activities -> include hospitals, clinics...
+;;   - professional-activities -> include commercial activities not covered by the 
+;;    previous breeds (factories, banks, travel agencies, offices...)
+;; To define an activity, one must define its parameters in the following order:
+;;   - kind -> a string describing the exact activity, for example "restaurant"
+;;   - production-value -> a number (0 to 1) determining the productive value of the 
+;;     activity
+;;   - a number (0 to 1) determining how capable of employing work from home an activity 
+;;     would be
+
+;; leisure-activities
+"restaurant"   0.3   0
+"restaurant"   0.4   0
+"bar"   0.2   0
+"park"   0.1   0
+"park"   0.1   0
+"theatre"   0.3   0
+"cinema"   0.4   0
+"dance-club"   0.4   0
+"comics-shop"   0.5   0.3
+"mall"   0.8   0.2

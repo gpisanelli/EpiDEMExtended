@@ -1,0 +1,33 @@
+;; This file contains the risk (probability) of contracting the virus per age class and 
+;; situation
+;; see http://www.quotidianosanita.it/allegati/allegato1389403.pdf (Riaperture_report.pdf)
+;; In each age class we only have the risks related to situations we modelled
+;; In particular, for each age class we have the risks (in the presented order):
+;; 0-4 -> home-risk
+;; 5-14 -> home-risk, school-risk, transports-risk, leisure-risk
+;; 15-19 -> home-risk, school-risk, transports-risk, leisure-risk
+;; 20-24 -> home-risk, school-risk, transports-risk, leisure-risk
+;; 25-39 -> home-risk, work-risk, transports-risk, leisure-risk
+;; 40-64 -> home-risk, work-risk, transports-risk, leisure-risk
+;; >=65 -> home-risk, transports-risk, leisure-risk
+;; Since the document has more age classes than we consider, when we aggregate some, the
+;; value considered is the mean of the single values
+;; Each probability is obtained as the (mean) number of contacts in a certain 
+;; situation divided by the total (mean) number of contacts the age class experiences 
+;; (minus the "Altre attività" number of contacts, since those activities aren't 
+;; modelled) * 100
+
+;; risk 0-4 (total number of contacts = 13.79)
+32.56
+;; risk 5-14   (total number of contacts = 21.35)
+21.17   48.85   5.81   23.79
+;; risk 15-19   (total number of contacts = 26.41)
+17.38   50.06   6.59   25.86
+;; risk 20-24   (total number of contacts = 17.35)
+20.23   6.74   5.53   41.67   ;; school-risk basso (forse non si considera l'uni nel doc)
+;; risk 25-39   (total number of contacts = 16.82)
+22.59   33.53   5.83   30.62
+;; risk 40-64   (total number of contacts = 16.42)
+19.24   41.35   4.38   19.00
+;; risk >=65   (total number of contacts = 8.60)
+36.86   6.86   43.95

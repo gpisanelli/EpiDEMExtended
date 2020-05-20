@@ -1,0 +1,73 @@
+;; This file contains (a first guess of) the activities and their durations per age class
+;; (first guess of the) cycles per age-class:
+;;   - 5-14   school -> recreation (afternoon) -> home
+;;   - 15-19   school -> recreation (afternoon) | home -> home
+;;   - 20-24   school -> home -> recreation (evening) -> home
+;;   - 25-39   work -> home -> recreation (evening) | home -> home
+;;   - 40-64   work -> home -> recreation (evening) | home -> home
+;;   - >=65   recreation -> home -> recreation -> home
+;; Any kind of cycle can be defined by specifying the couples activity - duration in 
+;; order, as done below
+;; Specifiable activities are:
+;;   - "school" (must be specified only for the appropriate age class)
+;;   - "work" (must be specified only for the appropriate age class)
+;;   - "recreation" (the exact activity will be chosen randomly)
+;;   - "home"
+;; However, if one wishes to introduce variability for a time slice, an activity like
+;; "activityA-activityB" can be specified -> this will make so that for that time slice
+;; the activity will be randomly chosen between the two (the duration will remain the same)
+;; Note that one can specify any number of activities separated by the hyphen for a single 
+;; time slice -> as a side effect, this is also useful to make so that an activity will be 
+;; chosen more likely -> for example by specifying "school-recreation" the likeliness of 
+;; each activity will be 50%, but with "school-school-school-recreation", "school" will be 
+;; chosen 75% of the times, "recreation" 25% of the times
+
+;; cycle-5-14
+"school"   6
+"recreation"   5
+"home"   13
+
+;; separator between age classes
+;; (important for them to be 2, the code searches for that many)
+"-" "-"
+
+;; cycle-15-19
+"school"   5
+"recreation-home"   6
+"home"   13
+
+;; separator between age classes
+"-" "-"
+
+;; cycle-20-24
+"school"   5
+"home"   8
+"recreation"   3
+"home"   8
+
+;; separator between age classes
+"-" "-"
+
+;; cycle-25-39
+"work"   8
+"home"   4
+"recreation-home"   3
+"home"   9
+
+;; separator between age classes
+"-" "-"
+
+;; cycle-40-64
+"work"   8
+"home"   3
+"recreation-home"   3
+"home"   10
+
+;; separator between age classes
+"-" "-"
+
+;; cycle-65-and-over
+"recreation"   5
+"home"   2
+"recreation"   3
+"home"   14
