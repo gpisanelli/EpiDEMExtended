@@ -16,6 +16,13 @@
 ;; education-activities
 "primary-school"   0   0.5
 "primary-school"   0   0.5
+"primary-school"   0   0.5
+"primary-school"   0   0.5
 "secondary-school"   0   0.7
 "secondary-school"   0   0.7
+"secondary-school"   0   0.7
+"secondary-school"   0   0.7
+"university"   0.5   0.9
+"university"   0.5   0.9
+"university"   0.5   0.9
 "university"   0.5   0.9

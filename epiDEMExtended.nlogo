@@ -1336,8 +1336,8 @@ end
 GRAPHICS-WINDOW
 644
 10
-2062
-1429
+2662
+2029
 -1
 -1
 10.0
@@ -1350,10 +1350,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--70
-70
--70
-70
+-100
+100
+-100
+100
 1
 1
 1
@@ -1456,7 +1456,7 @@ recovery-chance
 recovery-chance
 10
 100
-40.0
+30.0
 5
 1
 NIL
@@ -1490,16 +1490,16 @@ average-recovery-time
 average-recovery-time
 50
 1000
-500.0
+700.0
 10
 1
 NIL
 HORIZONTAL
 
 MONITOR
-339
+336
 453
-418
+389
 498
 R0
 r0
@@ -1564,9 +1564,9 @@ NIL
 HORIZONTAL
 
 MONITOR
-340
+337
 504
-464
+461
 549
 Infected while at home
 word count people with [ infected-while-at-home? ] \"   (\" (precision (count people with [ infected-while-at-home? ] / (count people with [ cured? ] + count people with [ infected? ] ) * 100) 2) \"%)\"
@@ -1575,9 +1575,9 @@ word count people with [ infected-while-at-home? ] \"   (\" (precision (count pe
 11
 
 MONITOR
-472
+469
 504
-600
+597
 549
 Infected while at school
 word count people with [ infected-while-at-school? ] \"   (\" (precision (count people with [ infected-while-at-school? ] / (count people with [ cured? ] + count people with [ infected? ] ) * 100) 2) \"%)\"
@@ -1586,9 +1586,9 @@ word count people with [ infected-while-at-school? ] \"   (\" (precision (count 
 11
 
 MONITOR
-341
+338
 558
-464
+461
 603
 Infected while at work
 word count people with [ infected-while-at-work? ] \"   (\" (precision (count people with [ infected-while-at-work? ] / (count people with [ cured? ] + count people with [ infected? ] ) * 100) 2) \"%)\"
@@ -1597,9 +1597,9 @@ word count people with [ infected-while-at-work? ] \"   (\" (precision (count pe
 11
 
 MONITOR
-473
+470
 558
-601
+598
 603
 Infected while at leisure
 word count people with [ infected-while-at-leisure? ] \"   (\" (precision (count people with [ infected-while-at-leisure? ] / (count people with [ cured? ] + count people with [ infected? ] ) * 100) 2) \"%)\"
@@ -1608,9 +1608,9 @@ word count people with [ infected-while-at-leisure? ] \"   (\" (precision (count
 11
 
 MONITOR
-521
+518
 453
-640
+637
 498
 Infected while moving
 word count people with [ infected-while-moving? ] \"   (\" (precision (count people with [ infected-while-moving? ] / (count people with [ cured? ] + count people with [ infected? ] ) * 100) 2) \"%)\"
@@ -1619,9 +1619,9 @@ word count people with [ infected-while-moving? ] \"   (\" (precision (count peo
 11
 
 MONITOR
-424
+395
 453
-515
+512
 498
 Initially infected
 word count people with [ initially-infected? ] \"   (\" (precision (count people with [ initially-infected? ] / (count people with [ cured? ] + count people with [ infected? ] ) * 100) 2) \"%)\"

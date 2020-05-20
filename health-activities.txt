@@ -16,6 +16,14 @@
 ;; health-activities
 "hospital"   0.3   0.2
 "hospital"   0.3   0.2
+"hospital"   0.3   0.2
+"clinic"   0.3   0
+"clinic"   0.3   0
 "clinic"   0.3   0
 "clinic"   0.3   0
 "chemist's"   0.5   0.1
+"chemist's"   0.5   0.1
+"dentist"   0.5   0
+"dentist"   0.5   0
+"vet"   0.3   0
+"vet"   0.3   0
