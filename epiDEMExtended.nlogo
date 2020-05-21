@@ -53,8 +53,8 @@ globals
   durations-list-65-and-over
 
   ;; percentages to model how families are composed (see "families%.txt")
-  parents-25-39-percentage   ;; the percentage of 25-39 being parents
-  parents-40-64-percentage   ;; the percentage of 40-64 being parents
+  parents-25-39-percentage   ;; the percentage of 25-39 being parents (living with children)
+  parents-40-64-percentage   ;; the percentage of 40-64 being parents (living with children)
   siblings-percentage   ;; the percentage of siblings in appropriate age classes
   people-20-24-with-parents-percentage   ;; the percentage of 20-24 living with parents
   people-20-24-house-sharing-percentage   ;; the percentage of 20-24 living with another 20-24 (roommates)

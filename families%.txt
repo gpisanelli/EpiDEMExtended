@@ -15,8 +15,10 @@
 ;;   - 40-64 may live with another 40-64 or alone
 ;;   - >=65 may live with another >=65 or alone
 ;; Available perentages:
-;;   - parents-25-39-percentage -> the percentage of 25-39 being parents
-;;   - parents-40-64-percentage -> the percentage of 40-64 being parents
+;;   - parents-25-39-percentage -> the percentage of 25-39 being parents (living 
+;;     with children)
+;;   - parents-40-64-percentage -> the percentage of 40-64 being parents (living 
+;;     with children)
 ;;   - siblings-percentage -> determines the percentage/likeliness of siblings in 
 ;;     appropriate age classes (applied to those age classes living with parents)
 ;;   - people-20-24-with-parents-percentage -> the percentage of 20-24 living with 
@@ -38,9 +40,9 @@
 ;;    track of both
 ;; NB for these percentages to hold and make sense the % of each age class must be 
 ;;    coherent with what is written here
-;; To check if any person was reassigned to an already existing family, one can use from 
-;; the observer the following command -> 
-;; -> ask patches with [ count people-here > 4 ] [ print "-" ask people-here [ print age-class ] ]
+;; To check how the families turned out, one can use the following command (or similar 
+;; variants):
+;; -> ask patches with [ count people-here > 0 ] [ print "-" ask people-here [ print age-class ] ]
 ;; (prints the age classes of people in families with more than 4 individuals)
 
 ;; parents-25-39-percentage
