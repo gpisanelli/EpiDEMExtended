@@ -61,6 +61,8 @@ globals
   people-25-39-in-a-couple-percentage   ;; the percentage of 25-39 living in a couple, not necessarily parents
   people-40-64-in-a-couple-percentage   ;; the percentage of 40-64 living in a couple, not necessarily parents
   people-65-and-over-in-a-couple-percentage   ;; the percentage of 65 and over living in a couple
+
+  global-productivity   ;; to keep trace of the variations of productivity due to the quarantine
 ]
 
 patches-own
@@ -956,6 +958,8 @@ to go
   ;; recolouring people depending on their state
   ask people [ assign-color ]
 
+  update-global-productivity
+
   calculate-r0
 
   tick
@@ -1281,6 +1285,27 @@ to recolour-activities-based-on-quarantine
   ]
 end
 
+to update-global-productivity
+  let education-productivity sum [ production-value ] of education-activities with [ color != grey ]
+  ;; calculating closed activities productivity only if necessary
+  if quarantine-level > 0 [
+    ;; activities closed due to quarantine have their production value modified depending on their ability to apply smart working
+    set education-productivity education-productivity + sum [ production-value * smart-working-capability ] of education-activities with [ color = grey ]
+  ]
+  let leisure-productivity sum [ production-value ] of leisure-activities with [ color != grey ]
+  let professional-productivity sum [ production-value ] of professional-activities with [ color != grey ]
+  let health-productivity sum [ production-value ] of health-activities with [ color != grey ]
+  ;; calculating closed activities productivity only if necessary
+  if quarantine-level > 1 [
+    ;; activities closed due to quarantine have their production value modified depending on their ability to apply smart working
+    set leisure-productivity leisure-productivity + sum [ production-value * smart-working-capability ] of leisure-activities with [ color = grey ]
+    set professional-productivity professional-productivity + sum [ production-value * smart-working-capability ] of professional-activities with [ color = grey ]
+    set health-productivity health-productivity + sum [ production-value * smart-working-capability ] of health-activities with [ color = grey ]
+  ]
+
+  set global-productivity (leisure-productivity + education-productivity + health-productivity + professional-productivity)
+end
+
 to calculate-r0
   let new-infected sum [ nb-infected ] of people
   let new-recovered sum [ nb-recovered ] of people
@@ -1362,9 +1387,9 @@ hours
 
 BUTTON
 235
-258
+208
 318
-291
+241
 setup
 setup
 NIL
@@ -1379,9 +1404,9 @@ NIL
 
 BUTTON
 335
-258
+208
 418
-291
+241
 go
 go
 T
@@ -1396,9 +1421,9 @@ NIL
 
 SLIDER
 46
-14
+10
 600
-47
+43
 initial-people
 initial-people
 200
@@ -1410,10 +1435,10 @@ NIL
 HORIZONTAL
 
 PLOT
-338
-311
-632
-441
+337
+248
+631
+378
 Population
 hours
 # of people
@@ -1429,10 +1454,10 @@ PENS
 "Not Infected" 1.0 0 -10899396 true "" "plot count people with [ not infected? ]"
 
 PLOT
-11
-453
-330
-589
+10
+390
+329
+526
 Infection and Recovery Rates
 hours
 rate
@@ -1449,9 +1474,9 @@ PENS
 
 SLIDER
 47
-59
+49
 316
-92
+82
 recovery-chance
 recovery-chance
 10
@@ -1463,10 +1488,10 @@ NIL
 HORIZONTAL
 
 PLOT
-11
-311
-329
-441
+10
+248
+328
+378
 Cumulative Infected and Recovered
 hours
 % total pop
@@ -1483,9 +1508,9 @@ PENS
 
 SLIDER
 332
-59
+49
 600
-92
+82
 average-recovery-time
 average-recovery-time
 50
@@ -1497,10 +1522,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-336
-453
-389
-498
+335
+390
+388
+435
 R0
 r0
 2
@@ -1509,9 +1534,9 @@ r0
 
 SLIDER
 332
-153
+127
 600
-186
+160
 patch-infection-decay-time
 patch-infection-decay-time
 1
@@ -1524,9 +1549,9 @@ HORIZONTAL
 
 SWITCH
 47
-107
+88
 239
-140
+121
 environmental-infection?
 environmental-infection?
 1
@@ -1534,10 +1559,10 @@ environmental-infection?
 -1000
 
 SLIDER
-47
-201
-314
-234
+48
+166
+315
+199
 quarantine-level
 quarantine-level
 0
@@ -1550,9 +1575,9 @@ HORIZONTAL
 
 SLIDER
 47
-153
+127
 314
-186
+160
 base-patch-infection-chance
 base-patch-infection-chance
 0
@@ -1564,10 +1589,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-337
-504
-461
-549
+336
+441
+460
+486
 Infected while at home
 word count people with [ infected-while-at-home? ] \"   (\" (precision (count people with [ infected-while-at-home? ] / (count people with [ cured? ] + count people with [ infected? ] ) * 100) 2) \"%)\"
 2
@@ -1575,10 +1600,10 @@ word count people with [ infected-while-at-home? ] \"   (\" (precision (count pe
 11
 
 MONITOR
-469
-504
-597
-549
+468
+441
+596
+486
 Infected while at school
 word count people with [ infected-while-at-school? ] \"   (\" (precision (count people with [ infected-while-at-school? ] / (count people with [ cured? ] + count people with [ infected? ] ) * 100) 2) \"%)\"
 2
@@ -1586,10 +1611,10 @@ word count people with [ infected-while-at-school? ] \"   (\" (precision (count 
 11
 
 MONITOR
-338
-558
-461
-603
+337
+495
+460
+540
 Infected while at work
 word count people with [ infected-while-at-work? ] \"   (\" (precision (count people with [ infected-while-at-work? ] / (count people with [ cured? ] + count people with [ infected? ] ) * 100) 2) \"%)\"
 2
@@ -1597,10 +1622,10 @@ word count people with [ infected-while-at-work? ] \"   (\" (precision (count pe
 11
 
 MONITOR
-470
-558
-598
-603
+469
+495
+597
+540
 Infected while at leisure
 word count people with [ infected-while-at-leisure? ] \"   (\" (precision (count people with [ infected-while-at-leisure? ] / (count people with [ cured? ] + count people with [ infected? ] ) * 100) 2) \"%)\"
 2
@@ -1608,10 +1633,10 @@ word count people with [ infected-while-at-leisure? ] \"   (\" (precision (count
 11
 
 MONITOR
-518
-453
-637
-498
+517
+390
+636
+435
 Infected while moving
 word count people with [ infected-while-moving? ] \"   (\" (precision (count people with [ infected-while-moving? ] / (count people with [ cured? ] + count people with [ infected? ] ) * 100) 2) \"%)\"
 2
@@ -1619,12 +1644,34 @@ word count people with [ infected-while-moving? ] \"   (\" (precision (count peo
 11
 
 MONITOR
-395
-453
-512
-498
+394
+390
+511
+435
 Initially infected
 word count people with [ initially-infected? ] \"   (\" (precision (count people with [ initially-infected? ] / (count people with [ cured? ] + count people with [ infected? ] ) * 100) 2) \"%)\"
+2
+1
+11
+
+MONITOR
+10
+533
+95
+578
+Productivity %
+word (precision (global-productivity / (sum [ production-value ] of leisure-activities + sum [ production-value ] of education-activities + sum [ production-value ] of health-activities + sum [ production-value ] of professional-activities) * 100) 2) \"%\"
+2
+1
+11
+
+MONITOR
+103
+533
+207
+578
+Activities closed %
+word (precision (count turtles with [ color = grey ] / count turtles with [ breed != people and breed != houses ] * 100) 2) \"%\"
 2
 1
 11
