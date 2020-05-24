@@ -153,7 +153,7 @@ to setup
   setup-activities
   setup-people
   setup-families
-  ;;adjust-durations-lists
+  if more-realistic-activities-durations? [ adjust-durations-lists ]
   reset-ticks
 end
 
@@ -908,7 +908,6 @@ to setup-houses-common
   set color lput 150 extract-rgb color   ;; makes the colour a bit transparent
 end
 
-;; for now never called (commented in setup)
 ;; making so that the duration of activities are preponderant compared to the time it took to get to them
 to adjust-durations-lists
   let school-distances [ distance school-patch ] of people with [ school-patch != 0 ]
@@ -1675,6 +1674,17 @@ word (precision (count turtles with [ color = grey ] / count turtles with [ bree
 2
 1
 11
+
+SWITCH
+332
+88
+576
+121
+more-realistic-activities-durations?
+more-realistic-activities-durations?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
