@@ -121,7 +121,6 @@ leisure-activities-own
 education-activities-own
 [
   kind   ;; a string describing the exact activity
-  ;; production-value necessario per scuole? (italiano)
   production-value   ;; a number (0 to 1) determining the productive value of the activity
   smart-working-capability ;; a number (0 to 1) determining how capable of employing work from home an activity would be
 ]
@@ -129,7 +128,6 @@ education-activities-own
 health-activities-own
 [
   kind   ;; a string describing the exact activity
-  ;; production-value necessario per ospedali? (italiano)
   production-value   ;; a number (0 to 1) determining the productive value of the activity
   smart-working-capability ;; a number (0 to 1) determining how capable of employing work from home an activity would be
 ]
@@ -1271,7 +1269,8 @@ to recolour-activities-based-on-quarantine
   if quarantine-level = 2 [
     ask leisure-activities [ set color grey ]
     ask education-activities [ set color grey ]
-    ask health-activities [ set color cyan ]
+    ask health-activities with [ (kind != "hospital") and (kind != "clinic") ] [ set color grey ]
+    ask health-activities with [ (kind = "hospital") or (kind = "clinic") ] [ set color cyan ]
     ask professional-activities with [ kind != "factory" ] [ set color grey ]
     ask professional-activities with [ kind = "factory" ] [ set color blue ]
   ]

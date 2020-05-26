@@ -14,7 +14,7 @@
 ;;   - 25-39 may live with another 25-39 or alone
 ;;   - 40-64 may live with another 40-64 or alone
 ;;   - >=65 may live with another >=65 or alone
-;; Available perentages:
+;; Available percentages:
 ;;   - parents-25-39-percentage -> the percentage of 25-39 being parents (living 
 ;;     with children)
 ;;   - parents-40-64-percentage -> the percentage of 40-64 being parents (living 
