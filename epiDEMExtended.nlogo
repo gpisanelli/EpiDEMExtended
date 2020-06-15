@@ -31,6 +31,8 @@ globals
   ;;base-patch-infection-chance   ;; the probability for a patch to infect a person, "base" since it'll be scaled depending on how long the patch has been infected for
   ;;patch-infection-decay-time   ;; the number of ticks for which a patch will remain infected
   ;;quarantine-level   ;; a number (0 to 3) determining the current level of quarantine
+  ;;infect-each-n-ticks   ;; infectious people will only infect each specified number of ticks, useful to tune down the infection spread to better see the quarantine in action
+  ;;more-realistic-activities-durations?   ;; makes the duration of activities preponderant with respect to the average time it took to get to them (see adjust-durations-lists function)
 
   ;; lists to define the behaviour cycle of people (see "activities-durations.txt")
   ;; each pair has on the same index related values -> at index 0 are the first activity and its duration, at index 1 are the second activity and its duration and so on
@@ -941,9 +943,14 @@ to go
     ask patches with [ patch-infected? ] [ update-patch-infection ]
   ]
 
-  ask people with [ infected? ]
-    [ infect
-      maybe-recover ]
+  if (ticks mod infect-each-n-ticks) = 0 [
+    ask people with [ infected? ] [ infect ]
+  ]
+
+  ask people with [ infected? ] [
+    infect-my-patch
+    maybe-recover
+  ]
 
   if environmental-infection? [
     ask patches [ recolour-patch-based-on-infection ]
@@ -1192,21 +1199,6 @@ to infect  ;; turtle procedure
       ]
     ]
   ]
-
-  ;; maybe infect the patch I'm on
-  ;; no need to do that if I'm not moving -> I'll have a chance to infect anyway not moving people on patch-here due to closeness, while moving people
-  ;; aren't actually inside the same activity patch/building I'm in, so I shouldn't be able to infect them
-  if moving? [
-    if environmental-infection? [
-      ;; also infecting the patch an infected person is standing on
-      ask patch-here [
-        if not patch-infected? [
-          set patch-infected? true
-          set patch-infection-time-left patch-infection-decay-time
-        ]
-      ]
-    ]
-  ]
 end
 
 to set-my-current-infection-chance
@@ -1225,6 +1217,22 @@ to set-proper-infected-while-variable
     patch-here = work-patch [ set infected-while-at-work? true ]
     ;; if none of the previous are true, I must anyway be in an activity patch since I'm not moving -> the only possibility left is a leisure activity
     [ set infected-while-at-leisure? true ] )
+end
+
+to infect-my-patch
+  ;; infect the patch I'm on if necessary
+  ;; no need to do that if I'm not moving -> I'll have a chance to infect anyway not moving people on patch-here due to closeness, while moving people
+  ;; aren't actually inside the same activity patch/building I'm in, so I shouldn't be able to infect them
+  if moving? [
+    if environmental-infection? [
+      ask patch-here [
+        if not patch-infected? [
+          set patch-infected? true
+          set patch-infection-time-left patch-infection-decay-time
+        ]
+      ]
+    ]
+  ]
 end
 
 to maybe-recover
@@ -1512,7 +1520,7 @@ SLIDER
 average-recovery-time
 average-recovery-time
 50
-1000
+2000
 700.0
 10
 1
@@ -1532,9 +1540,9 @@ r0
 
 SLIDER
 332
-127
+88
 600
-160
+121
 patch-infection-decay-time
 patch-infection-decay-time
 1
@@ -1675,15 +1683,41 @@ word (precision (count turtles with [ color = grey ] / count turtles with [ bree
 11
 
 SWITCH
-332
-88
-576
-121
+333
+166
+577
+199
 more-realistic-activities-durations?
 more-realistic-activities-durations?
 1
 1
 -1000
+
+SLIDER
+332
+127
+600
+160
+infect-each-n-ticks
+infect-each-n-ticks
+1
+10
+1.0
+1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+337
+547
+396
+592
+Infected
+count people with [ cured? or infected? ]
+2
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
