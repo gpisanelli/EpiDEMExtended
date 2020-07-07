@@ -54,6 +54,8 @@ globals
   activities-list-65-and-over
   durations-list-65-and-over
 
+  ticks-modifier   ;; to memorize globally the hypothetical adjust-durations-lists modifier
+
   ;; percentages to model how families are composed (see "families%.txt")
   parents-25-39-percentage   ;; the percentage of 25-39 being parents (living with children)
   parents-40-64-percentage   ;; the percentage of 40-64 being parents (living with children)
@@ -159,6 +161,7 @@ end
 
 to setup-globals
   setup-lists
+  set ticks-modifier 1
   setup-families-percentages
 end
 
@@ -654,7 +657,7 @@ to setup-people-common
 
   ;; Set the recovery time for each agent to fall on a
   ;; normal distribution around average recovery time
-  set recovery-time random-normal average-recovery-time average-recovery-time / 4
+  set recovery-time random-normal average-recovery-time (average-recovery-time / 4)
 
   ;; make sure it lies between 0 and 2x average-recovery-time
   if recovery-time > average-recovery-time * 2 [
@@ -910,16 +913,20 @@ end
 
 ;; making so that the duration of activities are preponderant compared to the time it took to get to them
 to adjust-durations-lists
+  let tuning-factor 5   ;; can be modified however one wishes
   let school-distances [ distance school-patch ] of people with [ school-patch != 0 ]
   let work-distances [ distance work-patch ] of people with [ work-patch != 0 ]
-  let mean-distance mean sentence school-distances work-distances
-  let modified-mean-distance mean-distance / 5
-  set durations-list-5-14 map [ x -> int (x * modified-mean-distance) ] durations-list-5-14
-  set durations-list-15-19 map [ x -> int (x * modified-mean-distance) ] durations-list-15-19
-  set durations-list-20-24 map [ x -> int (x * modified-mean-distance) ] durations-list-20-24
-  set durations-list-25-39 map [ x -> int (x * modified-mean-distance) ] durations-list-25-39
-  set durations-list-40-64 map [ x -> int (x * modified-mean-distance) ] durations-list-40-64
-  set durations-list-65-and-over map [ x -> int (x * modified-mean-distance) ] durations-list-65-and-over
+  let mean-distance mean sentence school-distances work-distances   ;; always around 77
+  set ticks-modifier int (mean-distance / tuning-factor)
+  set durations-list-5-14 map [ x -> x * ticks-modifier ] durations-list-5-14
+  set durations-list-15-19 map [ x -> x * ticks-modifier ] durations-list-15-19
+  set durations-list-20-24 map [ x -> x * ticks-modifier ] durations-list-20-24
+  set durations-list-25-39 map [ x -> x * ticks-modifier ] durations-list-25-39
+  set durations-list-40-64 map [ x -> x * ticks-modifier ] durations-list-40-64
+  set durations-list-65-and-over map [ x -> x * ticks-modifier ] durations-list-65-and-over
+  ;; also modifying accordingly the recovery-time of people
+  ask people [ set recovery-time recovery-time * ticks-modifier ]
+  ;; also infect-each-n-ticks will be modified, see the "go" function
 end
 
 
@@ -940,10 +947,12 @@ to go
 
   if environmental-infection? [
     ask people with [ not infected? and not cured? ] [ maybe-get-infected-environmentally ]
-    ask patches with [ patch-infected? ] [ update-patch-infection ]
   ]
 
-  if (ticks mod infect-each-n-ticks) = 0 [
+  ;; must be outside of the environmental-infection? check to allow the user to switch it back and forth without graphical bugs
+  ask patches with [ patch-infected? ] [ update-patch-infection ]
+
+  if (ticks mod (infect-each-n-ticks * ticks-modifier)) = 0 [
     ask people with [ infected? ] [ infect ]
   ]
 
@@ -952,9 +961,8 @@ to go
     maybe-recover
   ]
 
-  if environmental-infection? [
-    ask patches [ recolour-patch-based-on-infection ]
-  ]
+  ;; must be outside of the environmental-infection? check to allow the user to switch it back and forth without graphical bugs
+  ask patches [ recolour-patch-based-on-infection ]
 
   ;; activities closed due to quarantine become grey
   recolour-activities-based-on-quarantine
@@ -1002,13 +1010,13 @@ to handle-cycle [ activities-list durations-list ]
   ;; either waiting for the end of an activity or the activity ended and I start moving towards the next target
   ifelse not moving? [
     ifelse current-activity-time-left = 0 [
-      ;; 95% of the people will choose next target depending on the actual quarantine-level
-      ifelse random-float 100 < 95 [
-        set target determine-target-depending-on-quarantine quarantine-level current-activity
+      ;; if the quarantine law is enforced, 5% of the people won't follow it and just go to a random leisure activity
+      ifelse quarantine-level != 0 and random-float 100 > 95 and current-activity != "home" [
+        set target determine-random-recreation-patch
       ]
-      ;; 5% of the people won't follow the law and choose next target as if there was no quarantine
+      ;; 95% of the people will instead follow the law and choose the next target depending on quarantine
       [
-        set target determine-target-depending-on-quarantine 0 current-activity
+        set target determine-target-depending-on-quarantine quarantine-level current-activity
       ]
       set steps distance target
       face target
@@ -1074,13 +1082,13 @@ to-report determine-target-depending-on-quarantine [ level current-activity ]
     ]
     [
       ;; level 1 isn't too bad, substituting school with recreation
-      ifelse level = 1 [
-        report determine-random-recreation-patch
-      ]
+      ;ifelse level = 1 [
+        ;report determine-random-recreation-patch
+      ;]
       ;; else, just go home
-      [
+      ;[
         report home-patch
-      ]
+      ;]
     ]
   ]
   if current-activity = "work" [
@@ -1089,10 +1097,10 @@ to-report determine-target-depending-on-quarantine [ level current-activity ]
     ]
     [
       ifelse level = 1 [
-        ;; if I work in a school, these were closed at quarantine-level = 1 -> level 1 isn't too bad, substituting school with recreation
+        ;; if I work in a school, these were closed at quarantine-level = 1 -> stay at home
         let education-patches ([ patch-here ] of education-activities)
         ifelse (member? work-patch education-patches) [
-          report determine-random-recreation-patch
+          report home-patch
         ]
         [
           report work-patch
@@ -1360,6 +1368,139 @@ to calculate-r0
 end
 
 
+
+;; TESTS (to delete)
+;; just a copy of the go function but it also sets the quarantine-level passed as argument as soon as more than 50% of the population gets infected
+;to experiment-go [ level ]
+;  while [ any? people with [ infected? ] ] [
+;
+;    if ((count people with [ infected? ]) / (count people) > 0.5) and (quarantine-level != level) [
+;      set quarantine-level level
+;    ]
+;
+;    ;; 0-4 just stay home
+;    ask people with [ age-class != 0 ] [ move ]
+;    ask people [ clear-count ]
+;
+;    if environmental-infection? [
+;      ask people with [ not infected? and not cured? ] [ maybe-get-infected-environmentally ]
+;      ask patches with [ patch-infected? ] [ update-patch-infection ]
+;    ]
+;
+;    if (ticks mod infect-each-n-ticks) = 0 [
+;      ask people with [ infected? ] [ infect ]
+;    ]
+;
+;    ask people with [ infected? ] [
+;      infect-my-patch
+;      maybe-recover
+;    ]
+;
+;    if environmental-infection? [
+;      ask patches [ recolour-patch-based-on-infection ]
+;    ]
+;
+;    ;; activities closed due to quarantine become grey
+;    recolour-activities-based-on-quarantine
+;
+;    ;; recolouring people depending on their state
+;    ask people [ assign-color ]
+;
+;    update-global-productivity
+;
+;    calculate-r0
+;
+;    tick
+;  ]
+;  stop
+;end
+;
+;to experiment-quarantine-1
+;  experiment-go 1
+;end
+;
+;to experiment-quarantine-2
+;  experiment-go 2
+;end
+;
+;to experiment-quarantine-3
+;  experiment-go 3
+;end
+;
+;to test
+;  ask people with [ age-class != 3 ] [ die ]
+;  adjust-durations-lists
+;  while [ ticks < 100000 ] [
+;    set test-school test-school + (count people with [ (not moving?) and (patch-here = school-patch) ])
+;    ask people [ test-move ]
+;    tick
+;  ]
+;end
+;
+;to test-move
+;  if age-class = 1 [
+;    test-handle activities-list-5-14 durations-list-5-14
+;  ]
+;  if age-class = 2 [
+;    test-handle activities-list-15-19 durations-list-15-19
+;  ]
+;  if age-class = 3 [
+;    test-handle activities-list-20-24 durations-list-20-24
+;  ]
+;end
+;
+;to test-handle [ activities-list durations-list ]
+;  ;; if I reached the end of the list, then start over
+;  if current-activity-index = (length activities-list) [
+;    set current-activity-index 0
+;  ]
+;  let current-activity (item current-activity-index activities-list)
+;  set current-activity (choose-one-if-necessary current-activity)
+;  let current-duration (item current-activity-index durations-list)
+;  ;; either waiting for the end of an activity or the activity ended and I start moving towards the next target
+;  ifelse not moving? [
+;    ifelse current-activity-time-left = 0 [
+;      ;; 95% of the people will choose next target depending on the actual quarantine-level
+;      ifelse random-float 100 <= 95 [
+;        set target determine-target-depending-on-quarantine quarantine-level current-activity
+;      ]
+;      ;; 5% of the people won't follow the law and choose next target as if there was no quarantine
+;      [
+;        set test% test% + 1
+;        set target determine-target-depending-on-quarantine 0 current-activity
+;      ]
+;      set steps distance target
+;      face target
+;      ;; if the next target is different from the patch I'm at, then I'll start moving
+;      ifelse steps >= 0.5 [
+;        set moving? true
+;      ]
+;      ;; else, no need to move, just wait for the necessary duration
+;      [
+;        set current-activity-time-left current-duration
+;      ]
+;    ]
+;    [
+;      set current-activity-time-left current-activity-time-left - 1
+;      ;; if I've waited enough, then handle the next activity
+;      if current-activity-time-left = 0 [
+;        set current-activity-index current-activity-index + 1
+;      ]
+;    ]
+;  ]
+;  ;; else branch -> moving = true -> either going towards the target (steps >= 0.5) or I've arrived and I set for how much I'll stay here
+;  [
+;    ifelse steps >= 0.5 [
+;      fd 1
+;      set steps steps - 1
+;    ]
+;    [
+;      set moving? false
+;      set current-activity-time-left current-duration
+;    ]
+;  ]
+;end
+
 ;; Extending epiDEMBasic, which has the following copyright:
 ; Copyright 2011 Uri Wilensky.
 ; See Info tab for full copyright and license.
@@ -1519,10 +1660,10 @@ SLIDER
 82
 average-recovery-time
 average-recovery-time
-50
-2000
-700.0
-10
+100
+10000
+500.0
+100
 1
 NIL
 HORIZONTAL
@@ -1588,7 +1729,7 @@ base-patch-infection-chance
 base-patch-infection-chance
 0
 100
-50.0
+10.0
 1
 1
 NIL
@@ -1689,7 +1830,7 @@ SWITCH
 199
 more-realistic-activities-durations?
 more-realistic-activities-durations?
-1
+0
 1
 -1000
 
@@ -1701,8 +1842,8 @@ SLIDER
 infect-each-n-ticks
 infect-each-n-ticks
 1
-10
-1.0
+20
+20.0
 1
 1
 NIL
@@ -1711,10 +1852,21 @@ HORIZONTAL
 MONITOR
 337
 547
-396
+460
 592
-Infected
+Infected (cumulative)
 count people with [ cured? or infected? ]
+2
+1
+11
+
+MONITOR
+469
+547
+598
+592
+Infected (currently)
+count people with [ infected? ]
 2
 1
 11
