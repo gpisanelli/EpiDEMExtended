@@ -32,9 +32,12 @@ globals
   ;;patch-infection-decay-time   ;; the number of ticks for which a patch will remain infected
   ;;quarantine-level   ;; a number (0 to 3) determining the current level of quarantine
   ;;infect-each-n-ticks   ;; infectious people will only infect each specified number of ticks, useful to tune down the infection spread to better see the quarantine in action
-  ;;more-realistic-activities-durations?   ;; makes the duration of activities preponderant with respect to the average time it took to get to them (see adjust-durations-lists function)
+  ;;possible-illegal-behaviours?   ;; makes so that people will behave illegally during the quarantine with a probability of 5%
+                                   ;; (to work correctly this will also modify time-related elements, see adjust-time-related-elements function)
+  ;;more-realistic-activities-durations?   ;; makes the durations of activities prepondernt compared to the time it took to get to them
+                                           ;; (to work correctly this will also modify time-related elements, see adjust-time-related-elements function)
 
-  ;; lists to define the behaviour cycle of people (see "activities-durations.txt")
+  ;; lists to define the behaviour cycle of people (see "config/activities-durations.txt")
   ;; each pair has on the same index related values -> at index 0 are the first activity and its duration, at index 1 are the second activity and its duration and so on
   activities-list-5-14
   durations-list-5-14
@@ -54,9 +57,9 @@ globals
   activities-list-65-and-over
   durations-list-65-and-over
 
-  ticks-modifier   ;; to memorize globally the hypothetical adjust-durations-lists modifier
+  ticks-modifier   ;; to memorize globally the hypothetical adjust-time-related-elements modifier
 
-  ;; percentages to model how families are composed (see "families%.txt")
+  ;; percentages to model how families are composed (see "config/families%.txt")
   parents-25-39-percentage   ;; the percentage of 25-39 being parents (living with children)
   parents-40-64-percentage   ;; the percentage of 40-64 being parents (living with children)
   siblings-percentage   ;; the percentage of siblings in appropriate age classes
@@ -155,7 +158,8 @@ to setup
   setup-activities
   setup-people
   setup-families
-  if more-realistic-activities-durations? [ adjust-durations-lists ]
+  if possible-illegal-behaviours? [ set more-realistic-activities-durations? true ]
+  if more-realistic-activities-durations? [ adjust-time-related-elements ]
   reset-ticks
 end
 
@@ -167,7 +171,7 @@ end
 
 to setup-lists
   initialize-lists-empty
-  file-open "activities-durations.txt"
+  file-open "config/activities-durations.txt"
   let activity 0
   let duration 0
   let continue? true
@@ -262,7 +266,7 @@ to initialize-lists-empty
 end
 
 to setup-families-percentages
-  file-open "families%.txt"   ;; the file must be well formed and contain the % in order (see the file)
+  file-open "config/families%.txt"   ;; the file must be well formed and contain the % in order (see the file)
   set parents-25-39-percentage file-read
   set parents-40-64-percentage file-read
   set siblings-percentage file-read
@@ -288,7 +292,7 @@ end
 to setup-leisure-activities
   let num-activities 0
   let useless 0
-  file-open "leisure-activities.txt"
+  file-open "config/leisure-activities.txt"
   ;; cycling through the file to count how many activities
   ;; (evitabile se la prima cosa che il file contiene e' il numero delle attivita') (italiano)
   while [ not file-at-end? ]
@@ -300,7 +304,7 @@ to setup-leisure-activities
   ]
   file-close
   ;; re-opening the file allows to read it from the start
-  file-open "leisure-activities.txt"
+  file-open "config/leisure-activities.txt"
   create-leisure-activities num-activities [
     set shape "circle"
     set color orange
@@ -316,7 +320,7 @@ end
 to setup-education-activities
   let num-activities 0
   let useless 0
-  file-open "education-activities.txt"
+  file-open "config/education-activities.txt"
   ;; cycling through the file to count how many activities
   ;; (evitabile se la prima cosa che il file contiene e' il numero delle attivita') (italiano)
   while [ not file-at-end? ]
@@ -328,7 +332,7 @@ to setup-education-activities
   ]
   file-close
   ;; re-opening the file allows to read it from the start
-  file-open "education-activities.txt"
+  file-open "config/education-activities.txt"
   create-education-activities num-activities [
     set shape "circle"
     set color yellow
@@ -344,7 +348,7 @@ end
 to setup-health-activities
   let num-activities 0
   let useless 0
-  file-open "health-activities.txt"
+  file-open "config/health-activities.txt"
   ;; cycling through the file to count how many activities
   ;; (evitabile se la prima cosa che il file contiene e' il numero delle attivita') (italiano)
   while [ not file-at-end? ]
@@ -356,7 +360,7 @@ to setup-health-activities
   ]
   file-close
   ;; re-opening the file allows to read it from the start
-  file-open "health-activities.txt"
+  file-open "config/health-activities.txt"
   create-health-activities num-activities [
     set shape "circle"
     set color cyan
@@ -372,7 +376,7 @@ end
 to setup-professional-activities
   let num-activities 0
   let useless 0
-  file-open "professional-activities.txt"
+  file-open "config/professional-activities.txt"
   ;; cycling through the file to count how many activities
   ;; (evitabile se la prima cosa che il file contiene e' il numero delle attivita') (italiano)
   while [ not file-at-end? ]
@@ -384,7 +388,7 @@ to setup-professional-activities
   ]
   file-close
   ;; re-opening the file allows to read it from the start
-  file-open "professional-activities.txt"
+  file-open "config/professional-activities.txt"
   create-professional-activities num-activities [
     set shape "circle"
     set color blue
@@ -421,9 +425,9 @@ end
 
 to setup-0-4
   ;; 0-4 age class
-  file-open "ageClass%.txt"   ;; file containing the percentage of each age class
+  file-open "config/ageClass%.txt"   ;; file containing the percentage of each age class
   let percent file-read   ;; the file must be well formed and contain the % in order (see the file)
-  file-open "riskPerAgeClass.txt"   ;; file containing the virus contraction risk per age class and situation
+  file-open "config/riskPerAgeClass.txt"   ;; file containing the virus contraction risk per age class and situation
   let h-risk file-read   ;; the file must be well formed and contain the risks in order (see the file)
   ;; "int" truncates
   create-people int (initial-people * percent / 100)
@@ -437,9 +441,9 @@ end
 to setup-5-14
   ;; 5-14 age class
   ;; reopening a file without prior closing doesn't reset the cursor position -> here I'm reading the proper values
-  file-open "ageClass%.txt"   ;; file containing the percentage of each age class
+  file-open "config/ageClass%.txt"   ;; file containing the percentage of each age class
   let percent file-read   ;; the file must be well formed and contain the % in order (see the file)
-  file-open "riskPerAgeClass.txt"   ;; file containing the virus contraction risk per age class and situation
+  file-open "config/riskPerAgeClass.txt"   ;; file containing the virus contraction risk per age class and situation
   ;; the file must be well formed and contain the risks in order (see the file)
   let h-risk file-read
   let s-risk file-read
@@ -469,9 +473,9 @@ end
 to setup-15-19
   ;; 15-19 age class
   ;; reopening a file without prior closing doesn't reset the cursor position -> here I'm reading the proper values
-  file-open "ageClass%.txt"   ;; file containing the percentage of each age class
+  file-open "config/ageClass%.txt"   ;; file containing the percentage of each age class
   let percent file-read   ;; the file must be well formed and contain the % in order (see the file)
-  file-open "riskPerAgeClass.txt"   ;; file containing the virus contraction risk per age class and situation
+  file-open "config/riskPerAgeClass.txt"   ;; file containing the virus contraction risk per age class and situation
   ;; the file must be well formed and contain the risks in order (see the file)
   let h-risk file-read
   let s-risk file-read
@@ -501,9 +505,9 @@ end
 to setup-20-24
   ;; 20-24 age class
   ;; reopening a file without prior closing doesn't reset the cursor position -> here I'm reading the proper values
-  file-open "ageClass%.txt"   ;; file containing the percentage of each age class
+  file-open "config/ageClass%.txt"   ;; file containing the percentage of each age class
   let percent file-read   ;; the file must be well formed and contain the % in order (see the file)
-  file-open "riskPerAgeClass.txt"   ;; file containing the virus contraction risk per age class and situation
+  file-open "config/riskPerAgeClass.txt"   ;; file containing the virus contraction risk per age class and situation
   ;; the file must be well formed and contain the risks in order (see the file)
   let h-risk file-read
   let s-risk file-read
@@ -533,9 +537,9 @@ end
 to setup-25-39
   ;; 25-39 age class
   ;; reopening a file without prior closing doesn't reset the cursor position -> here I'm reading the proper values
-  file-open "ageClass%.txt"   ;; file containing the percentage of each age class
+  file-open "config/ageClass%.txt"   ;; file containing the percentage of each age class
   let percent file-read   ;; the file must be well formed and contain the % in order (see the file)
-  file-open "riskPerAgeClass.txt"   ;; file containing the virus contraction risk per age class and situation
+  file-open "config/riskPerAgeClass.txt"   ;; file containing the virus contraction risk per age class and situation
   ;; the file must be well formed and contain the risks in order (see the file)
   let h-risk file-read
   let w-risk file-read
@@ -558,9 +562,9 @@ end
 to setup-40-64
   ;; 40-64 age class
   ;; reopening a file without prior closing doesn't reset the cursor position -> here I'm reading the proper values
-  file-open "ageClass%.txt"   ;; file containing the percentage of each age class
+  file-open "config/ageClass%.txt"   ;; file containing the percentage of each age class
   let percent file-read   ;; the file must be well formed and contain the % in order (see the file)
-  file-open "riskPerAgeClass.txt"   ;; file containing the virus contraction risk per age class and situation
+  file-open "config/riskPerAgeClass.txt"   ;; file containing the virus contraction risk per age class and situation
   ;; the file must be well formed and contain the risks in order (see the file)
   let h-risk file-read
   let w-risk file-read
@@ -597,9 +601,9 @@ end
 to setup-65-and-over
   ;; >=65 age class
   ;; reopening a file without prior closing doesn't reset the cursor position -> here I'm reading the proper values
-  file-open "ageClass%.txt"   ;; file containing the percentage of each age class
+  file-open "config/ageClass%.txt"   ;; file containing the percentage of each age class
   let percent file-read   ;; the file must be well formed and contain the % in order (see the file)
-  file-open "riskPerAgeClass.txt"   ;; file containing the virus contraction risk per age class and situation
+  file-open "config/riskPerAgeClass.txt"   ;; file containing the virus contraction risk per age class and situation
   ;; the file must be well formed and contain the risks in order (see the file)
   let h-risk file-read
   let t-risk file-read
@@ -912,12 +916,17 @@ to setup-houses-common
 end
 
 ;; making so that the duration of activities are preponderant compared to the time it took to get to them
-to adjust-durations-lists
-  let tuning-factor 5   ;; can be modified however one wishes
+;; this is done automatically if the illegal behaviours are switched on or the simulation won't work correctly (see the full report)
+;; other time-related elements such as the recovery-time of each individual and infect-each-n-ticks will be modified accordingly
+to adjust-time-related-elements
+  let modifying-factor 5   ;; to avoid activities durations becoming too long, setting this to 1 implies that an "activity duration unit" is as long as the average travelling duration
+  ;; calculating the average distance of all moving people from their possible activities
   let school-distances [ distance school-patch ] of people with [ school-patch != 0 ]
   let work-distances [ distance work-patch ] of people with [ work-patch != 0 ]
-  let mean-distance mean sentence school-distances work-distances   ;; always around 77
-  set ticks-modifier int (mean-distance / tuning-factor)
+  let leisure-distances []
+  foreach ([patch-here] of people with [ age-class != 0 ]) [ x -> set leisure-distances (sentence leisure-distances ([distance x] of leisure-activities))]
+  let mean-distance mean (sentence school-distances work-distances leisure-distances)   ;; always around 77 (with the current settings)
+  set ticks-modifier int (mean-distance / modifying-factor)
   set durations-list-5-14 map [ x -> x * ticks-modifier ] durations-list-5-14
   set durations-list-15-19 map [ x -> x * ticks-modifier ] durations-list-15-19
   set durations-list-20-24 map [ x -> x * ticks-modifier ] durations-list-20-24
@@ -928,6 +937,7 @@ to adjust-durations-lists
   ask people [ set recovery-time recovery-time * ticks-modifier ]
   ;; also infect-each-n-ticks will be modified, see the "go" function
 end
+
 
 
 ;;;
@@ -945,7 +955,7 @@ to go
   ask people with [ age-class != 0 ] [ move ]
   ask people [ clear-count ]
 
-  if environmental-infection? [
+  if environmental-infection? and (ticks mod (infect-each-n-ticks * ticks-modifier)) = 0 [
     ask people with [ not infected? and not cured? ] [ maybe-get-infected-environmentally ]
   ]
 
@@ -1010,8 +1020,10 @@ to handle-cycle [ activities-list durations-list ]
   ;; either waiting for the end of an activity or the activity ended and I start moving towards the next target
   ifelse not moving? [
     ifelse current-activity-time-left = 0 [
-      ;; if the quarantine law is enforced, 5% of the people won't follow it and just go to a random leisure activity
-      ifelse quarantine-level != 0 and random-float 100 > 95 and current-activity != "home" [
+      ;; if the illegal behaviours switch is activated and the quarantine law is enforced, 5% of the people won't follow it and just go to a random leisure activity
+      ;; check on current-activity != "home" to make so that illegal behaviours will be only in those time slices where the individual would have gone out anyway
+      ;; this avoids the individuals not being at home when they should have been (to have lunch/dinner or to sleep during the night)
+      ifelse possible-illegal-behaviours? and quarantine-level != 0 and random-float 100 > 95 and current-activity != "home" [
         set target determine-random-recreation-patch
       ]
       ;; 95% of the people will instead follow the law and choose the next target depending on quarantine
@@ -1081,14 +1093,7 @@ to-report determine-target-depending-on-quarantine [ level current-activity ]
       report school-patch
     ]
     [
-      ;; level 1 isn't too bad, substituting school with recreation
-      ;ifelse level = 1 [
-        ;report determine-random-recreation-patch
-      ;]
-      ;; else, just go home
-      ;[
-        report home-patch
-      ;]
+      report home-patch
     ]
   ]
   if current-activity = "work" [
@@ -1368,139 +1373,6 @@ to calculate-r0
 end
 
 
-
-;; TESTS (to delete)
-;; just a copy of the go function but it also sets the quarantine-level passed as argument as soon as more than 50% of the population gets infected
-;to experiment-go [ level ]
-;  while [ any? people with [ infected? ] ] [
-;
-;    if ((count people with [ infected? ]) / (count people) > 0.5) and (quarantine-level != level) [
-;      set quarantine-level level
-;    ]
-;
-;    ;; 0-4 just stay home
-;    ask people with [ age-class != 0 ] [ move ]
-;    ask people [ clear-count ]
-;
-;    if environmental-infection? [
-;      ask people with [ not infected? and not cured? ] [ maybe-get-infected-environmentally ]
-;      ask patches with [ patch-infected? ] [ update-patch-infection ]
-;    ]
-;
-;    if (ticks mod infect-each-n-ticks) = 0 [
-;      ask people with [ infected? ] [ infect ]
-;    ]
-;
-;    ask people with [ infected? ] [
-;      infect-my-patch
-;      maybe-recover
-;    ]
-;
-;    if environmental-infection? [
-;      ask patches [ recolour-patch-based-on-infection ]
-;    ]
-;
-;    ;; activities closed due to quarantine become grey
-;    recolour-activities-based-on-quarantine
-;
-;    ;; recolouring people depending on their state
-;    ask people [ assign-color ]
-;
-;    update-global-productivity
-;
-;    calculate-r0
-;
-;    tick
-;  ]
-;  stop
-;end
-;
-;to experiment-quarantine-1
-;  experiment-go 1
-;end
-;
-;to experiment-quarantine-2
-;  experiment-go 2
-;end
-;
-;to experiment-quarantine-3
-;  experiment-go 3
-;end
-;
-;to test
-;  ask people with [ age-class != 3 ] [ die ]
-;  adjust-durations-lists
-;  while [ ticks < 100000 ] [
-;    set test-school test-school + (count people with [ (not moving?) and (patch-here = school-patch) ])
-;    ask people [ test-move ]
-;    tick
-;  ]
-;end
-;
-;to test-move
-;  if age-class = 1 [
-;    test-handle activities-list-5-14 durations-list-5-14
-;  ]
-;  if age-class = 2 [
-;    test-handle activities-list-15-19 durations-list-15-19
-;  ]
-;  if age-class = 3 [
-;    test-handle activities-list-20-24 durations-list-20-24
-;  ]
-;end
-;
-;to test-handle [ activities-list durations-list ]
-;  ;; if I reached the end of the list, then start over
-;  if current-activity-index = (length activities-list) [
-;    set current-activity-index 0
-;  ]
-;  let current-activity (item current-activity-index activities-list)
-;  set current-activity (choose-one-if-necessary current-activity)
-;  let current-duration (item current-activity-index durations-list)
-;  ;; either waiting for the end of an activity or the activity ended and I start moving towards the next target
-;  ifelse not moving? [
-;    ifelse current-activity-time-left = 0 [
-;      ;; 95% of the people will choose next target depending on the actual quarantine-level
-;      ifelse random-float 100 <= 95 [
-;        set target determine-target-depending-on-quarantine quarantine-level current-activity
-;      ]
-;      ;; 5% of the people won't follow the law and choose next target as if there was no quarantine
-;      [
-;        set test% test% + 1
-;        set target determine-target-depending-on-quarantine 0 current-activity
-;      ]
-;      set steps distance target
-;      face target
-;      ;; if the next target is different from the patch I'm at, then I'll start moving
-;      ifelse steps >= 0.5 [
-;        set moving? true
-;      ]
-;      ;; else, no need to move, just wait for the necessary duration
-;      [
-;        set current-activity-time-left current-duration
-;      ]
-;    ]
-;    [
-;      set current-activity-time-left current-activity-time-left - 1
-;      ;; if I've waited enough, then handle the next activity
-;      if current-activity-time-left = 0 [
-;        set current-activity-index current-activity-index + 1
-;      ]
-;    ]
-;  ]
-;  ;; else branch -> moving = true -> either going towards the target (steps >= 0.5) or I've arrived and I set for how much I'll stay here
-;  [
-;    ifelse steps >= 0.5 [
-;      fd 1
-;      set steps steps - 1
-;    ]
-;    [
-;      set moving? false
-;      set current-activity-time-left current-duration
-;    ]
-;  ]
-;end
-
 ;; Extending epiDEMBasic, which has the following copyright:
 ; Copyright 2011 Uri Wilensky.
 ; See Info tab for full copyright and license.
@@ -1708,7 +1580,7 @@ environmental-infection?
 SLIDER
 48
 166
-315
+200
 199
 quarantine-level
 quarantine-level
@@ -1729,7 +1601,7 @@ base-patch-infection-chance
 base-patch-infection-chance
 0
 100
-10.0
+75.0
 1
 1
 NIL
@@ -1824,12 +1696,12 @@ word (precision (count turtles with [ color = grey ] / count turtles with [ bree
 11
 
 SWITCH
-333
+206
 166
-577
+383
 199
-more-realistic-activities-durations?
-more-realistic-activities-durations?
+possible-illegal-behaviours?
+possible-illegal-behaviours?
 0
 1
 -1000
@@ -1871,7 +1743,20 @@ count people with [ infected? ]
 1
 11
 
+SWITCH
+390
+166
+600
+199
+more-realistic-activities-durations?
+more-realistic-activities-durations?
+0
+1
+-1000
+
 @#$#@#$#@
+This model, called EpiDEMExtended, is an extension of epiDEMBasic. Below is the original description of the latter. For a full report regarding the extension visit https://github.com/gpisanelli/EpiDEMExtended
+
 ## WHAT IS IT?
 
 This model simulates the spread of an infectious disease in a closed population. It is an introductory model in the curricular unit called epiDEM (Epidemiology: Understanding Disease Dynamics and Emergence through Modeling). This particular model is formulated based on a mathematical model that describes the systemic dynamics of a phenomenon that emerges when one infected person is introduced in a wholly susceptible population. This basic model, in mathematical epidemiology, is known as the Kermack-McKendrick model.
